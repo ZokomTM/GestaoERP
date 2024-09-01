@@ -2,14 +2,17 @@ package gestaorp.com.br.erp.cargos.services;
 
 import gestaorp.com.br.erp.cargos.entities.Cargos;
 import gestaorp.com.br.erp.cargos.exeptions.ErrorExeptions;
-import gestaorp.com.br.erp.cargos.exeptions.Responses;
+import gestaorp.com.br.erp.responses.Responses;
 import gestaorp.com.br.erp.cargos.model.CargosRepository;
+import gestaorp.com.br.erp.responses.ResponsesList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,11 +44,12 @@ public class CargosService {
             return erros;
         }
 
+        cargo.setCriacao(new Date());
         cargo.setAlteracao(new Date());
         Cargos savedCargo = cargosRepository.save(cargo);
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Responses<Cargos> response = new Responses<>(HttpStatus.CREATED.value(), savedCargo, null);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /**
@@ -83,6 +87,103 @@ public class CargosService {
         Cargos savedCargo = cargosRepository.save(cargo);
 
         Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Remove (ou desativa) um cargo pelo ID.
+     *
+     * Este método busca um cargo pelo ID no repositório. Se o cargo for encontrado, ele define a data de alteração
+     * e a data de desativação como a data atual, efetivamente desativando o cargo. O método então salva as alterações
+     * no repositório. O método retorna uma resposta com o status HTTP 202 (Accepted), indicando que a solicitação foi
+     * aceita para processamento, mas a ação final pode ocorrer de forma assíncrona.
+     *
+     * @param id O ID do cargo a ser removido (ou desativado).
+     * @return ResponseEntity contendo um objeto {@link Responses} com o código de status HTTP 202 (Accepted)
+     *         e informações adicionais (se houver).
+     */
+    public ResponseEntity<Responses> removerPorID(Long id) {
+
+        Cargos cargo = this.cargosRepository.findById(id).orElse(null);
+
+        if(cargo != null){
+            cargo.setAlteracao(new Date());
+            cargo.setDesativacao(new Date());
+            cargosRepository.save(cargo);
+        }
+
+        Responses<Cargos> response = new Responses<>(HttpStatus.ACCEPTED.value(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+    }
+
+
+    /**
+     * Retorna uma lista de todos os cargos ordenados pelo nome em ordem ascendente.
+     *
+     * @return ResponseEntity contendo um objeto ResponsesList com status HTTP 200 (OK) e a lista de cargos.
+     *         Se não houver cargos, a lista retornada será vazia.
+     */
+    public ResponseEntity<ResponsesList> listarTodos() {
+        List<Cargos> cargos = this.cargosRepository.findByDesativacaoIsNull(Sort.by("nome").ascending());
+        ResponsesList<Cargos> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Listar todos os cargos que estão desativados.
+     *
+     * Este método busca todos os cargos no repositório que têm a data de desativação não nula,
+     * indicando que estão desativados. Ele retorna uma lista de cargos desativados encapsulada em
+     * um objeto {@link ResponsesList} com status HTTP 200 (OK).
+     *
+     * @return ResponseEntity contendo um objeto {@link ResponsesList} com a lista de cargos desativados,
+     *         o código de status HTTP e informações adicionais (se houver).
+     */
+    public ResponseEntity<ResponsesList> listarDesativados() {
+        List<Cargos> cargos = this.cargosRepository.findByDesativacaoIsNotNull();
+        ResponsesList<Cargos> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Reativar um cargo que foi desativado.
+     *
+     * Este método busca um cargo pelo ID que está desativado (ou seja, possui uma data de desativação não nula),
+     * e o reativa. A reativação é feita definindo a data de desativação como nula e atualizando a data de alteração.
+     * Após reativar o cargo, o método chama o método {@link #alterar(Long, Cargos)} para persistir as alterações.
+     * O método retorna o cargo atualizado encapsulado em um objeto {@link Responses} com status HTTP 200 (OK).
+     *
+     * @param id O ID do cargo a ser reativado.
+     * @return ResponseEntity contendo um objeto {@link Responses} com o cargo reativado, o código de status HTTP
+     *         e informações adicionais (se houver).
+     */
+    public ResponseEntity<Responses> reativar(Long id) {
+        Cargos cargo = this.cargosRepository.findByIdAndDesativacaoIsNotNull(id);
+
+        if(cargo != null){
+            cargo.setAlteracao(new Date());
+            cargo.setDesativacao(null);
+            this.alterar(id, cargo);
+        }
+
+        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+
+    /**
+     * Retorna os detalhes de um cargo específico com base no ID fornecido.
+     *
+     * @param id O ID do cargo que se deseja obter.
+     * @return ResponseEntity contendo um objeto Responses com status HTTP 200 (OK) e os detalhes do cargo.
+     *         Se o cargo com o ID fornecido não for encontrado, será retornado null no lugar.
+     */
+    public ResponseEntity<Responses> listarPorID(Long id) {
+        Cargos cargo = this.cargosRepository.findById(id)
+                .orElse(null);
+
+        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
