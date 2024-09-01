@@ -1,7 +1,7 @@
-package gestaorp.com.br.erp.funcionario.entities;
+package gestaorp.com.br.erp.empresa.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gestaorp.com.br.erp.cargo.entities.Cargo;
+import gestaorp.com.br.erp.funcionario.entities.Funcionario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Funcionario {
+public class Empresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,31 +23,22 @@ public class Funcionario {
 
     private String nome;
 
-    private String telefone;
+    private String servidor;
 
-    private String webhook;
+    @OneToMany
+    private Funcionario responsavel;
 
-    private String discordID;
+    private Integer quantidadeFuncionarios;
 
-    private String email;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
+    private Date ultimoPagamento;
 
-    private String userName;
-
-    private String password;
-
-    @ManyToOne
-    @JoinColumn(name = "cargo_id")
-    private Cargo cargo;
-
-    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
     private Date contratacao;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
-    private Date demisao;
+    private Date desativacao;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
     private Date alteracao;
 }

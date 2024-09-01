@@ -17,6 +17,55 @@ Este sistema foi projetado para proporcionar uma gestão completa e intuitiva, a
 
 ## Endpoints da API já criados
 
+### Cadastrar Empresa
+
+- **Método:** POST
+- **Endpoint:** `/cargos`
+- **Descrição:** Cadastra uma nova empresa. O corpo da solicitação deve conter os dados da empresa a ser cadastrada.
+
+### Alterar Empresa
+
+- **Método:** PUT
+- **Endpoint:** `/cargos/{id}`
+- **Descrição:** Altera uma empresa existente identificada pelo ID. O corpo da solicitação deve conter os dados atualizados da empresa.
+
+### Reativar Empresa
+
+- **Método:** PATCH
+- **Endpoint:** `/cargos/{id}`
+- **Descrição:** Reativa uma empresa desativada identificada pelo ID. Remove a data de desativação da empresa.
+
+### Efetuar Pagamento
+
+- **Método:** PATCH
+- **Endpoint:** `/cargos/pagamento/{id}`
+- **Descrição:** Efetua o pagamento relacionado à empresa identificada pelo ID. Atualiza o status de pagamento da empresa.
+
+### Remover Empresa por ID
+
+- **Método:** DELETE
+- **Endpoint:** `/cargos/{id}`
+- **Descrição:** Remove (ou desativa) uma empresa identificada pelo ID. Define a data de desativação da empresa.
+
+### Listar Todas as Empresas
+
+- **Método:** GET
+- **Endpoint:** `/cargos`
+- **Descrição:** Retorna uma lista de todas as empresas cadastradas e ativas.
+
+### Listar Empresa por ID
+
+- **Método:** GET
+- **Endpoint:** `/cargos/{id}`
+- **Descrição:** Retorna os detalhes de uma empresa identificada pelo ID.
+
+### Listar Empresas Desativadas
+
+- **Método:** GET
+- **Endpoint:** `/cargos/desativados`
+- **Descrição:** Retorna uma lista de todas as empresas desativadas, ou seja, aquelas que possuem uma data de desativação não nula.
+
+
 ### Cadastrar Cargo
 
 - **Método:** POST
@@ -58,3 +107,42 @@ Este sistema foi projetado para proporcionar uma gestão completa e intuitiva, a
 - **Método:** GET
 - **Endpoint:** `/cargos/desativados`
 - **Descrição:** Retorna uma lista de todos os cargos desativados, ou seja, aqueles que possuem uma data de desativação não nula.
+
+
+## Entidades do Sistema
+
+### Empresa
+
+- **ID:** `Long`
+    - Identificador único da empresa.
+- **Nome:** `String`
+    - Nome da empresa.
+- **Servidor:** `String`
+    - Informações do servidor associado à empresa.
+- **Responsável:** `Funcionario`
+    - Funcionário responsável pela empresa (referência à entidade `Funcionario`).
+- **Quantidade de Funcionários:** `Integer`
+    - Número total de funcionários na empresa.
+- **Último Pagamento:** `Date`
+    - Data e hora do último pagamento realizado pela empresa.
+- **Contratação:** `Date`
+    - Data e hora da contratação da empresa.
+- **Desativação:** `Date`
+    - Data e hora da desativação da empresa, se aplicável.
+- **Alteração:** `Date`
+    - Data e hora da última alteração registrada na empresa.
+
+### Cargo
+
+- **ID:** `Long`
+    - Identificador único do cargo.
+- **Nome:** `String`
+    - Nome do cargo.
+- **Comissão:** `Integer`
+    - Valor da comissão associada ao cargo.
+- **Criação:** `Date`
+    - Data e hora em que o cargo foi criado.
+- **Desativação:** `Date`
+    - Data e hora da desativação do cargo, se aplicável.
+- **Alteração:** `Date`
+    - Data e hora da última alteração registrada no cargo.

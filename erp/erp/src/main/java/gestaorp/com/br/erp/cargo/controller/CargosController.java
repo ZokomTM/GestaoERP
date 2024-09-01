@@ -1,8 +1,8 @@
-package gestaorp.com.br.erp.cargos.controller;
+package gestaorp.com.br.erp.cargo.controller;
 
-import gestaorp.com.br.erp.cargos.entities.Cargos;
+import gestaorp.com.br.erp.cargo.entities.Cargo;
 import gestaorp.com.br.erp.responses.Responses;
-import gestaorp.com.br.erp.cargos.services.CargosService;
+import gestaorp.com.br.erp.cargo.services.CargosService;
 import gestaorp.com.br.erp.responses.ResponsesList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +17,12 @@ public class CargosController {
     private CargosService cargosService;
 
     @PostMapping("")
-    public ResponseEntity<Responses> cadastrar(@RequestBody Cargos cargo) {
+    public ResponseEntity<Responses> cadastrar(@RequestBody Cargo cargo) {
         return this.cargosService.cadastrar(cargo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Responses> alterar(@PathVariable Long id, @RequestBody Cargos cargo) {
+    public ResponseEntity<Responses> alterar(@PathVariable Long id, @RequestBody Cargo cargo) {
         return this.cargosService.alterar(id, cargo);
     }
 
@@ -38,7 +38,7 @@ public class CargosController {
 
     @GetMapping("")
     public ResponseEntity<ResponsesList> listarTodos() {
-        return this.cargosService.listarTodos();
+        return this.cargosService.listarTodosAtivos();
     }
 
     @GetMapping("/{id}")
@@ -48,6 +48,6 @@ public class CargosController {
 
     @GetMapping("/desativados")
     public ResponseEntity<ResponsesList> listarDesativados() {
-        return this.cargosService.listarDesativados();
+        return this.cargosService.listarTodosDesativados();
     }
 }

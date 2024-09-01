@@ -1,7 +1,6 @@
 package gestaorp.com.br.erp.responses;
 
-import gestaorp.com.br.erp.cargos.entities.Cargos;
-import gestaorp.com.br.erp.cargos.exeptions.ErrorExeptions;
+import gestaorp.com.br.erp.exeptions.ErrorExeptions;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

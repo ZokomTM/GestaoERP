@@ -1,9 +1,9 @@
-package gestaorp.com.br.erp.cargos.services;
+package gestaorp.com.br.erp.cargo.services;
 
-import gestaorp.com.br.erp.cargos.entities.Cargos;
-import gestaorp.com.br.erp.cargos.exeptions.ErrorExeptions;
+import gestaorp.com.br.erp.cargo.entities.Cargo;
+import gestaorp.com.br.erp.exeptions.ErrorExeptions;
 import gestaorp.com.br.erp.responses.Responses;
-import gestaorp.com.br.erp.cargos.model.CargosRepository;
+import gestaorp.com.br.erp.cargo.model.CargosRepository;
 import gestaorp.com.br.erp.responses.ResponsesList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CargosService {
@@ -34,9 +33,9 @@ public class CargosService {
      * @return Um `ResponseEntity` contendo um objeto `Responses` com o cargo salvo e o status HTTP OK,
      *         ou um erro indicando problemas com o cadastro.
      */
-    public ResponseEntity<Responses> cadastrar(Cargos cargo){
+    public ResponseEntity<Responses> cadastrar(Cargo cargo){
         if(cargo.getId() != null){
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_FOI_INFORMADO);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_FOI_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         ResponseEntity<Responses> erros = validacoesComuns(cargo);
@@ -46,9 +45,9 @@ public class CargosService {
 
         cargo.setCriacao(new Date());
         cargo.setAlteracao(new Date());
-        Cargos savedCargo = cargosRepository.save(cargo);
+        Cargo savedCargo = cargosRepository.save(cargo);
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.CREATED.value(), savedCargo, null);
+        Responses<Cargo> response = new Responses<>(HttpStatus.CREATED.value(), savedCargo, null);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -67,14 +66,14 @@ public class CargosService {
      * @return Um `ResponseEntity` contendo um objeto `Responses` com o cargo atualizado e o status HTTP OK,
      *         ou um erro indicando problemas com a alteração.
      */
-    public ResponseEntity<Responses> alterar(Long id, Cargos cargo){
+    public ResponseEntity<Responses> alterar(Long id, Cargo cargo){
         if(id == null || id == 0){
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_NAO_INFORMADO);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        Optional<Cargos> cargoConsultado = this.cargosRepository.findById(id);
+        Cargo cargoConsultado = this.cargosRepository.findById(id).orElse(null);
         if(cargoConsultado == null){
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_CARGO_NAO_ENCONTRADO);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_CARGO_NAO_ENCONTRADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
@@ -84,9 +83,12 @@ public class CargosService {
         }
 
         cargo.setAlteracao(new Date());
-        Cargos savedCargo = cargosRepository.save(cargo);
+        cargo.setCriacao(cargoConsultado.getCriacao());
+        cargo.setDesativacao(cargoConsultado.getDesativacao());
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
+        Cargo savedCargo = cargosRepository.save(cargo);
+
+        Responses<Cargo> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -104,7 +106,7 @@ public class CargosService {
      */
     public ResponseEntity<Responses> removerPorID(Long id) {
 
-        Cargos cargo = this.cargosRepository.findById(id).orElse(null);
+        Cargo cargo = this.cargosRepository.findById(id).orElse(null);
 
         if(cargo != null){
             cargo.setAlteracao(new Date());
@@ -112,36 +114,36 @@ public class CargosService {
             cargosRepository.save(cargo);
         }
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.ACCEPTED.value(), null, null);
+        Responses<Cargo> response = new Responses<>(HttpStatus.ACCEPTED.value(), null, null);
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
 
     /**
-     * Retorna uma lista de todos os cargos ordenados pelo nome em ordem ascendente.
+     * Retorna uma lista de todos os cargos ativos ordenados pelo nome em ordem ascendente.
      *
      * @return ResponseEntity contendo um objeto ResponsesList com status HTTP 200 (OK) e a lista de cargos.
      *         Se não houver cargos, a lista retornada será vazia.
      */
-    public ResponseEntity<ResponsesList> listarTodos() {
-        List<Cargos> cargos = this.cargosRepository.findByDesativacaoIsNull(Sort.by("nome").ascending());
-        ResponsesList<Cargos> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
+    public ResponseEntity<ResponsesList> listarTodosAtivos() {
+        List<Cargo> cargos = this.cargosRepository.findByDesativacaoIsNull(Sort.by("nome").ascending());
+        ResponsesList<Cargo> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
      * Listar todos os cargos que estão desativados.
      *
-     * Este método busca todos os cargos no repositório que têm a data de desativação não nula,
+     * Este método busca todos os cargos desativados no repositório que têm a data de desativação não nula,
      * indicando que estão desativados. Ele retorna uma lista de cargos desativados encapsulada em
      * um objeto {@link ResponsesList} com status HTTP 200 (OK).
      *
      * @return ResponseEntity contendo um objeto {@link ResponsesList} com a lista de cargos desativados,
      *         o código de status HTTP e informações adicionais (se houver).
      */
-    public ResponseEntity<ResponsesList> listarDesativados() {
-        List<Cargos> cargos = this.cargosRepository.findByDesativacaoIsNotNull();
-        ResponsesList<Cargos> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
+    public ResponseEntity<ResponsesList> listarTodosDesativados() {
+        List<Cargo> cargos = this.cargosRepository.findByDesativacaoIsNotNull();
+        ResponsesList<Cargo> response = new ResponsesList<>(HttpStatus.OK.value(), cargos, 0, 0, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -150,7 +152,7 @@ public class CargosService {
      *
      * Este método busca um cargo pelo ID que está desativado (ou seja, possui uma data de desativação não nula),
      * e o reativa. A reativação é feita definindo a data de desativação como nula e atualizando a data de alteração.
-     * Após reativar o cargo, o método chama o método {@link #alterar(Long, Cargos)} para persistir as alterações.
+     * Após reativar o cargo, o método chama o método {@link #alterar(Long, Cargo)} para persistir as alterações.
      * O método retorna o cargo atualizado encapsulado em um objeto {@link Responses} com status HTTP 200 (OK).
      *
      * @param id O ID do cargo a ser reativado.
@@ -158,7 +160,7 @@ public class CargosService {
      *         e informações adicionais (se houver).
      */
     public ResponseEntity<Responses> reativar(Long id) {
-        Cargos cargo = this.cargosRepository.findByIdAndDesativacaoIsNotNull(id);
+        Cargo cargo = this.cargosRepository.findByIdAndDesativacaoIsNotNull(id);
 
         if(cargo != null){
             cargo.setAlteracao(new Date());
@@ -166,7 +168,7 @@ public class CargosService {
             this.alterar(id, cargo);
         }
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
+        Responses<Cargo> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -180,10 +182,10 @@ public class CargosService {
      *         Se o cargo com o ID fornecido não for encontrado, será retornado null no lugar.
      */
     public ResponseEntity<Responses> listarPorID(Long id) {
-        Cargos cargo = this.cargosRepository.findById(id)
+        Cargo cargo = this.cargosRepository.findById(id)
                 .orElse(null);
 
-        Responses<Cargos> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
+        Responses<Cargo> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -198,21 +200,21 @@ public class CargosService {
      * @return Um `ResponseEntity` contendo um objeto `Responses` com o status HTTP e mensagens de erro apropriadas,
      *         ou `null` se todas as validações forem bem-sucedidas.
      */
-    private ResponseEntity<Responses> validacoesComuns(Cargos cargo){
+    private ResponseEntity<Responses> validacoesComuns(Cargo cargo){
         if (cargo.getComissao() == null) {
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_NAO_INFORMADA);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_NAO_INFORMADA);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if(cargo.getNome() == null || cargo.getNome().isBlank()){
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_NOME_VAZIO_OU_NAO_INFORMADO);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_NOME_VAZIO_OU_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if(cargo.getComissao() < 0) {
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_MENOR_ZERO);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_MENOR_ZERO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if(cargo.getComissao() > 100) {
-            Responses<Cargos> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_MAIOR_CEM);
+            Responses<Cargo> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_COMISSAO_MAIOR_CEM);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         return null;
