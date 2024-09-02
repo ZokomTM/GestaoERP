@@ -1,6 +1,6 @@
 package gestaorp.com.br.erp.empresa.controller;
 
-import gestaorp.com.br.erp.empresa.entities.Empresa;
+import gestaorp.com.br.erp.empresa.entities.EmpresaDTO;
 import gestaorp.com.br.erp.empresa.services.EmpresaService;
 import gestaorp.com.br.erp.responses.Responses;
 import gestaorp.com.br.erp.responses.ResponsesList;
@@ -17,12 +17,12 @@ public class EmpresaController {
     private EmpresaService empresaService;
 
     @PostMapping("")
-    public ResponseEntity<Responses> cadastrar(@RequestBody Empresa cargo) {
+    public ResponseEntity<Responses> cadastrar(@RequestBody EmpresaDTO cargo) {
         return this.empresaService.cadastrar(cargo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Responses> alterar(@PathVariable Long id, @RequestBody Empresa cargo) {
+    public ResponseEntity<Responses> alterar(@PathVariable Long id, @RequestBody EmpresaDTO cargo) {
         return this.empresaService.alterar(id, cargo);
     }
 

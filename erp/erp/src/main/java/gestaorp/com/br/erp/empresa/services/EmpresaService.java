@@ -1,6 +1,6 @@
 package gestaorp.com.br.erp.empresa.services;
 
-import gestaorp.com.br.erp.empresa.entities.Empresa;
+import gestaorp.com.br.erp.empresa.entities.EmpresaDTO;
 import gestaorp.com.br.erp.exeptions.ErrorExeptions;
 import gestaorp.com.br.erp.empresa.model.EmpresaRepository;
 import gestaorp.com.br.erp.responses.Responses;
@@ -33,9 +33,9 @@ public class EmpresaService {
      * @return Um `ResponseEntity` contendo um objeto `Responses` com a empresa salva e o status HTTP CREATED,
      *         ou um erro indicando problemas com o cadastro.
      */
-    public ResponseEntity<Responses> cadastrar(Empresa empresa){
+    public ResponseEntity<Responses> cadastrar(EmpresaDTO empresa){
         if(empresa.getId() != null){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_FOI_INFORMADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_FOI_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         ResponseEntity<Responses> erros = validacoesComuns(empresa);
@@ -45,9 +45,9 @@ public class EmpresaService {
 
         empresa.setContratacao(new Date());
         empresa.setAlteracao(new Date());
-        Empresa empresaSalva = this.empresaRepository.save(empresa);
+        EmpresaDTO empresaSalva = this.empresaRepository.save(empresa);
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.CREATED.value(), empresaSalva, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.CREATED.value(), empresaSalva, null);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -66,14 +66,14 @@ public class EmpresaService {
      * @return Um `ResponseEntity` contendo um objeto `Responses` com a empresa alterada e o status HTTP OK,
      *         ou um erro indicando problemas com a alteração.
      */
-    public ResponseEntity<Responses> alterar(Long id, Empresa empresa){
+    public ResponseEntity<Responses> alterar(Long id, EmpresaDTO empresa){
         if(id == null || id == 0){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_NAO_INFORMADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_ID_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        Empresa empresaConsultada = this.empresaRepository.findById(id).orElse(null);
+        EmpresaDTO empresaConsultada = this.empresaRepository.findById(id).orElse(null);
         if(empresaConsultada == null){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
@@ -87,9 +87,9 @@ public class EmpresaService {
         empresa.setUltimoPagamento(empresaConsultada.getUltimoPagamento());
         empresa.setDesativacao(empresaConsultada.getDesativacao());
 
-        Empresa savedCargo = this.empresaRepository.save(empresa);
+        EmpresaDTO savedCargo = this.empresaRepository.save(empresa);
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.OK.value(), savedCargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -107,18 +107,18 @@ public class EmpresaService {
      */
     public ResponseEntity<Responses> desativarPorID(Long id) {
 
-        Empresa empresa = this.empresaRepository.findById(id).orElse(null);
+        EmpresaDTO empresa = this.empresaRepository.findById(id).orElse(null);
 
         if(empresa != null){
             empresa.setAlteracao(new Date());
             empresa.setDesativacao(new Date());
             this.empresaRepository.save(empresa);
         } else{
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.ACCEPTED.value(), null, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.ACCEPTED.value(), null, null);
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
@@ -132,8 +132,8 @@ public class EmpresaService {
      * @return Um `ResponseEntity` contendo um objeto `ResponsesList` com a lista de empresas ativas e o status HTTP OK.
      */
     public ResponseEntity<ResponsesList> listarTodosAtivos() {
-        List<Empresa> empresa = this.empresaRepository.findByDesativacaoIsNull(Sort.by("nome").ascending());
-        ResponsesList<Empresa> response = new ResponsesList<>(HttpStatus.OK.value(), empresa, 0, 0, null);
+        List<EmpresaDTO> empresa = this.empresaRepository.findByDesativacaoIsNull(Sort.by("nome").ascending());
+        ResponsesList<EmpresaDTO> response = new ResponsesList<>(HttpStatus.OK.value(), empresa, 0, 0, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -147,8 +147,8 @@ public class EmpresaService {
      * @return Um `ResponseEntity` contendo um objeto `ResponsesList` com a lista de empresas desativadas e o status HTTP OK.
      */
     public ResponseEntity<ResponsesList> listarTodosDesativados() {
-        List<Empresa> empresa = this.empresaRepository.findByDesativacaoIsNotNull();
-        ResponsesList<Empresa> response = new ResponsesList<>(HttpStatus.OK.value(), empresa, 0, 0, null);
+        List<EmpresaDTO> empresa = this.empresaRepository.findByDesativacaoIsNotNull();
+        ResponsesList<EmpresaDTO> response = new ResponsesList<>(HttpStatus.OK.value(), empresa, 0, 0, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -165,18 +165,18 @@ public class EmpresaService {
      *         ou um erro indicando que a empresa não foi encontrada.
      */
     public ResponseEntity<Responses> reativar(Long id) {
-        Empresa empresa = this.empresaRepository.findByIdAndDesativacaoIsNotNull(id);
+        EmpresaDTO empresa = this.empresaRepository.findByIdAndDesativacaoIsNotNull(id);
 
         if(empresa != null){
             empresa.setAlteracao(new Date());
             empresa.setDesativacao(null);
             this.alterar(id, empresa);
         } else{
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.OK.value(), empresa, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.OK.value(), empresa, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -193,18 +193,18 @@ public class EmpresaService {
      *         ou um erro indicando que a empresa não foi encontrada.
      */
     public ResponseEntity<Responses> efetuarPagamento(Long id) {
-        Empresa empresa = this.empresaRepository.findByIdAndDesativacaoIsNotNull(id);
+        EmpresaDTO empresa = this.empresaRepository.findByIdAndDesativacaoIsNotNull(id);
 
         if(empresa != null){
             empresa.setAlteracao(new Date());
             empresa.setUltimoPagamento(new Date());
             this.alterar(id, empresa);
         } else{
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_EMPRESA_NAO_ENCONTRADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.OK.value(), empresa, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.OK.value(), empresa, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -220,10 +220,10 @@ public class EmpresaService {
      *         ou `null` se a empresa não for encontrada.
      */
     public ResponseEntity<Responses> listarPorID(Long id) {
-        Empresa cargo = this.empresaRepository.findById(id)
+        EmpresaDTO cargo = this.empresaRepository.findById(id)
                 .orElse(null);
 
-        Responses<Empresa> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
+        Responses<EmpresaDTO> response = new Responses<>(HttpStatus.OK.value(), cargo, null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -238,17 +238,17 @@ public class EmpresaService {
      * @param empresa O objeto `Empresa` a ser validado.
      * @return Um `ResponseEntity` com o erro correspondente, ou `null` se não houver erros.
      */
-    private ResponseEntity<Responses> validacoesComuns(Empresa empresa){
+    private ResponseEntity<Responses> validacoesComuns(EmpresaDTO empresa){
         if(empresa.getNome() == null || empresa.getNome().isBlank()){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_NOME_VAZIO_OU_NAO_INFORMADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_NOME_VAZIO_OU_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if(empresa.getServidor() == null || empresa.getServidor().isBlank()){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_SERVIDOR_VAZIO_OU_NAO_INFORMADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_SERVIDOR_VAZIO_OU_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if(empresa.getResponsavel() == null){
-            Responses<Empresa> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_SERVIDOR_VAZIO_OU_NAO_INFORMADO);
+            Responses<EmpresaDTO> response = new Responses<>(HttpStatus.BAD_REQUEST.value(), null, ErrorExeptions.ERROR_SERVIDOR_VAZIO_OU_NAO_INFORMADO);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 

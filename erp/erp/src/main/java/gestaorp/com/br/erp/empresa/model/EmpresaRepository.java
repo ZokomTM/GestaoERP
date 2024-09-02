@@ -1,18 +1,18 @@
 package gestaorp.com.br.erp.empresa.model;
 
-import gestaorp.com.br.erp.empresa.entities.Empresa;
+import gestaorp.com.br.erp.empresa.entities.EmpresaDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
+public interface EmpresaRepository extends JpaRepository<EmpresaDTO, Long> {
 
-    Empresa findByNome(String nome);
+    EmpresaDTO findByNome(String nome);
 
-    List<Empresa> findByDesativacaoIsNotNull();
+    List<EmpresaDTO> findByDesativacaoIsNotNull();
 
-    List<Empresa> findByDesativacaoIsNull(Sort sort);
+    List<EmpresaDTO> findByDesativacaoIsNull(Sort sort);
 
-    Empresa findByIdAndDesativacaoIsNotNull(Long id);
+    EmpresaDTO findByIdAndDesativacaoIsNotNull(Long id);
 }
